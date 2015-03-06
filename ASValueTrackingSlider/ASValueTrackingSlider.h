@@ -38,6 +38,9 @@
 // cornerRadius of the popUpView, default is 4.0
 @property (nonatomic) CGFloat popUpViewCornerRadius;
 
+@property (nonatomic) CGFloat popUpBorderWidth;
+@property (nonatomic, strong) UIColor *popUpBorderColor;
+
 // changes the left handside of the UISlider track to match current popUpView color
 // the track color alpha is always set to 1.0, even if popUpView color is less than 1.0
 @property (nonatomic) BOOL autoAdjustTrackColor; // (default is YES)

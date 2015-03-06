@@ -12,6 +12,7 @@
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #import "ASValuePopUpView.h"
+#import "ASValuePopUpViewHelper.h"
 
 const float ARROW_LENGTH = 13.0;
 const float MIN_POPUPVIEW_WIDTH = 36.0;
@@ -25,6 +26,7 @@ NSString *const FillColorAnimation = @"fillColor";
 {
     NSMutableAttributedString *_attributedString;
     CAShapeLayer *_backgroundLayer;
+    CAShapeLayer *_backgroundBorderLayer;
     CATextLayer *_textLayer;
     CGSize _oldSize;
     CGFloat _arrowCenterOffset;
@@ -41,20 +43,44 @@ NSString *const FillColorAnimation = @"fillColor";
         self.userInteractionEnabled = NO;
         _backgroundLayer = [CAShapeLayer layer];
         _backgroundLayer.anchorPoint = CGPointMake(0, 0);
-        
+        _backgroundBorderLayer = [CAShapeLayer layer];
+        _backgroundBorderLayer.anchorPoint = CGPointZero;
+        _backgroundBorderLayer.fillColor = [UIColor clearColor].CGColor;
+      
         _textLayer = [CATextLayer layer];
         _textLayer.alignmentMode = kCAAlignmentCenter;
         _textLayer.anchorPoint = CGPointMake(0, 0);
         _textLayer.contentsScale = [UIScreen mainScreen].scale;
         _textLayer.actions = @{@"bounds" : [NSNull null],   // prevent implicit animation of bounds
                                @"position" : [NSNull null]};// and position
-        
+      
+        _borderColor = [UIColor blackColor];
+      
         [self.layer addSublayer:_backgroundLayer];
+        [self.layer addSublayer:_backgroundBorderLayer];
         [self.layer addSublayer:_textLayer];
         
         _attributedString = [[NSMutableAttributedString alloc] initWithString:@" " attributes:nil];
     }
     return self;
+}
+
+- (void)setBorderColor:(UIColor *)borderColor
+{
+  if (_borderColor != borderColor)
+  {
+    _borderColor = borderColor;
+    [self drawPath];
+  }
+}
+
+- (void)setBorderWidth:(CGFloat)borderWidth
+{
+  if (_borderWidth != borderWidth)
+  {
+    _borderWidth = borderWidth;
+    [self drawPath];
+  }
 }
 
 - (void)setCornerRadius:(CGFloat)radius
@@ -223,26 +249,16 @@ NSString *const FillColorAnimation = @"fillColor";
     // Create rounded rect
     CGRect roundedRect = self.bounds;
     roundedRect.size.height -= ARROW_LENGTH;
-    UIBezierPath *roundedRectPath = [UIBezierPath bezierPathWithRoundedRect:roundedRect cornerRadius:_cornerRadius];
-    
-    // Create arrow path
-    CGFloat maxX = CGRectGetMaxX(roundedRect); // prevent arrow from extending beyond this point
     CGFloat arrowTipX = CGRectGetMidX(self.bounds) + _arrowCenterOffset;
-    CGPoint tip = CGPointMake(arrowTipX, CGRectGetMaxY(self.bounds));
-    
-    CGFloat arrowLength = CGRectGetHeight(roundedRect)/2.0;
-    CGFloat x = arrowLength * tan(45.0 * M_PI/180); // x = half the length of the base of the arrow
-    
-    UIBezierPath *arrowPath = [UIBezierPath bezierPath];
-    [arrowPath moveToPoint:tip];
-    [arrowPath addLineToPoint:CGPointMake(MAX(arrowTipX - x, 0), CGRectGetMaxY(roundedRect) - arrowLength)];
-    [arrowPath addLineToPoint:CGPointMake(MIN(arrowTipX + x, maxX), CGRectGetMaxY(roundedRect) - arrowLength)];
-    [arrowPath closePath];
-    
-    // combine arrow path and rounded rect
-    [roundedRectPath appendPath:arrowPath];
-    
-    _backgroundLayer.path = roundedRectPath.CGPath;
+    UIBezierPath *path = [ASValuePopUpViewHelper bezierPathWithIOS7RoundedRect:roundedRect
+                                                                  cornerRadius:_cornerRadius
+                                                                    arrowWidth:ARROW_LENGTH
+                                                                 arrowPosition:arrowTipX
+                                                                   arrowHeight:ARROW_LENGTH];
+    _backgroundBorderLayer.strokeColor = self.borderColor.CGColor;
+    _backgroundBorderLayer.lineWidth = self.borderWidth;
+    _backgroundBorderLayer.path = path.CGPath;
+    _backgroundLayer.path = path.CGPath;
 }
 
 - (void)layoutSubviews

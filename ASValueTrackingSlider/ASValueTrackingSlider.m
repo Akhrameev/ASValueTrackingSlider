@@ -120,6 +120,18 @@ static void * ASValueTrackingSliderBoundsContext = &ASValueTrackingSliderBoundsC
     }
 }
 
+- (void)setPopUpBorderColor:(UIColor *)popUpBorderColor
+{
+  _popUpBorderColor = popUpBorderColor;
+  [self.popUpView setBorderColor:popUpBorderColor];
+}
+
+- (void)setPopUpBorderWidth:(CGFloat)popUpBorderWidth
+{
+  _popUpBorderWidth = popUpBorderWidth;
+  [self.popUpView setBorderWidth:popUpBorderWidth];
+}
+
 - (void)setPopUpViewCornerRadius:(CGFloat)popUpViewCornerRadius
 {
     _popUpViewCornerRadius = popUpViewCornerRadius;

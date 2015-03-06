@@ -23,6 +23,8 @@
 
 @property (weak, nonatomic) id <ASValuePopUpViewDelegate> delegate;
 @property (nonatomic) CGFloat cornerRadius;
+@property (nonatomic, strong) UIColor *borderColor;
+@property (nonatomic, assign) CGFloat borderWidth;
 
 - (UIColor *)color;
 - (void)setColor:(UIColor *)color;
